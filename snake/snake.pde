@@ -1,36 +1,108 @@
 import processing.serial.*;
- 
- Serial myPort;  
+
+// one segment of the snake
+class Ellipse
+{
+  int x; int y; int l; 
+
+  Ellipse(int _x, int _y)
+  {
+    // l is size
+    x=_x; y=_y; l=14;
+  }
+  
+  Ellipse(int _x, int _y, int _l)
+  {
+    x=_x; y=_y; l=_l;
+  }
+  
+  void createEllipse()
+  {
+    rect(x,y,l,l);
+  }
+  
+  void createEllipse(int a,int b)
+  {
+    ellipse(a,b,l,l);
+  }
+  
+  void moveUp()
+  {
+    y-=l;
+    if(y<0) y=height;
+  }
+
+  void moveDown()
+  {
+    y+=l;
+    if(y>height) y=0;
+  }
+
+  void moveRight()
+  {
+    x+=l;
+    if(x>width) x=0;
+  }
+
+  void moveLeft()
+  {
+    x-=l;
+    if(x<0) x=width;
+  }
+
+  int getX()
+  {
+    return x;
+  }
+
+  int getY()
+  {
+    return y;
+  }
+
+  int getL()
+  {
+    return l;
+  }
+}
+
+Serial myPort;  
 
 ArrayList ellipseList;
 Ellipse head;
-int SEGMENT_SIZE = 20;
-int dir;
+int SEGMENT_SIZE = 14;
+int dir;    // direction we are headed
 int prevPosX, prevPosY;
 PFont f;
 String mesaj="";
 boolean ok=false;
 Ellipse food;
 
-
 void setup()
 {
   size(1274, 798);
-  String portName = Serial.list()[0];
-  myPort = new Serial(this, portName, 9600);
-  
+//  String portName = Serial.list()[0];
+//  myPort = new Serial(this, portName, 9600);
   
   ellipseList = new ArrayList();
-  head = new Ellipse(140, 140);
+  head = new Ellipse(500, 500);  // start position
   ellipseList.add(head);
-  dir=2;
-  // Start with head and small body
-  ellipseList.add(new Ellipse(width/2 - 2 * SEGMENT_SIZE, height/2));
+  dir = 2;
+  // Start with head and small body, it doesn't matter that 
+  // the position is completely wrong, because it updates quickly :)
+  for(int i=0; i<10; ++i) {
+    ellipseList.add(new Ellipse(width/2 - 2 * SEGMENT_SIZE, height/2));
+  }
+
+
   addFood();
+  
+  ok = true;
  
   //speed of game
   frameRate(12);
 }
+
 void draw()
 {
   fill(0);
@@ -82,21 +154,19 @@ boolean tryToEatAndMove(int p)
  //   int tpx4 = e4.getX();
  //   int tpy4 = e4.getY();
     
-    if (dist(x, y, tpx1, tpy1) < 14){
-      print("dead a ");
-      //exit();
-  }
-    if (sl>1){
-    if (dist(x, y, tpx2, tpy2) < 14){
-      print("dead b ");
+    int i;
+    int j;
 
-      //exit();
-    }  
+    for (i=1; i<sl; ++i) {
+      Ellipse n = (Ellipse) ellipseList.get(i);
+      if (dist(x, y, n.getX(), n.getY()) < 14) {
+        exit();
+        print("REALLY DEAD");
+
+      }
     }
-  //  if (dist(x, y, tpx3, tpy3) < 14){
-   //   print("dead");
-   //   exit();
-  //}
+  
+    
   
   if (dist(x, y, food.getX(), food.getY()) < 14)
   {
@@ -132,6 +202,7 @@ boolean tryToEatAndMove(int p)
   move();
   return false;
 }
+
 void addFood()
 {
   int rx = int (random(1, 56));
@@ -141,6 +212,7 @@ void addFood()
     print(food.getX() + " ");
       print(food.getY() + " ");
 }
+
 void move()
 {
   prevPosX = head.getX();
@@ -229,58 +301,3 @@ void serialEvent(Serial myPort) {
    }
 }
 
-
-class Ellipse
-{
-  int x; int y; int l; 
-  Ellipse(int _x, int _y)
-  {
-    // size of snake 
-    x=_x; y=_y; l=14;
-  }
-  Ellipse(int _x, int _y, int _l)
-  {
-    x=_x; y=_y; l=_l;
-  }
-  void createEllipse()
-  {
-    rect(x,y,l,l);
-  }
-  void createEllipse(int a,int b)
-  {
-    ellipse(a,b,l,l);
-  }
-  
-  void moveUp()
-  {
-    y-=l;
-    if(y<0) y=height;
-  }
-  void moveDown()
-  {
-    y+=l;
-    if(y>height) y=0;
-  }
-  void moveRight()
-  {
-    x+=l;
-    if(x>width) x=0;
-  }
-  void moveLeft()
-  {
-    x-=l;
-    if(x<0) x=width;
-  }
-  int getX()
-  {
-    return x;
-  }
-  int getY()
-  {
-    return y;
-  }
-  int getL()
-  {
-    return l;
-  }
-}

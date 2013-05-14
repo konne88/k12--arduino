@@ -46,6 +46,27 @@ class Snake {
     segments.add(0,head);
   }
 
+  int opposite(int dir) {
+    if (dir == UP) {
+      return DOWN;
+    } else if (dir == DOWN) {
+      return UP;
+    } else if (dir == LEFT) {
+      return RIGHT;
+    } else if (dir == RIGHT) {
+      return LEFT;
+    } else {
+      // this should never happen
+      return 0;
+    }
+  }
+
+  void setDirection(int dir) {
+    if (dir != opposite(this.direction)) {
+      direction = dir;
+    }
+  }
+
   boolean grow;
   int direction;
   ArrayList<Position> segments;
@@ -121,9 +142,10 @@ void setup()
 {
   size(WIDTH*SIZE,HEIGHT*SIZE);
   game = new Game(WIDTH,HEIGHT);
-
-//  String portName = Serial.list()[0];
-//  myPort = new Serial(this, portName, 9600);
+  
+  //String portName = Serial.list();
+  //println(Serial.list());
+  myPort = new Serial(this, Serial.list()[1], 9600);
    
   //speed of game
   frameRate(12);
@@ -149,25 +171,25 @@ void draw()
 void keyPressed()
 {
   if(key==CODED) {
-    game.snake.direction = keyCode;
+    game.snake.setDirection(keyCode);
   }
 }
 
 void serialEvent(Serial myPort) {
-  // read a byte from the serial port:
-//  int inByte = myPort.read();
-//   if (inByte == '1') { 
- //    dir=0;
-  // }
-    //  myPort.clear();  
-//       if (inByte == '2') { 
- //    dir=3;
- //  }
- //  if (inByte == '3') { 
- //    dir=2;
- //  }
- //  if (inByte == '4') { 
-  //   dir=1;
-  // }
-}
+  int command = myPort.read();
+  int dir;
 
+  if (command == 2) { 
+    dir=LEFT;
+  } else if (command == 3) { 
+    dir=RIGHT;
+  } else if (command == 0) { 
+    dir=UP;
+  } else if (command == 1) { 
+    dir=DOWN;
+  } else {
+    return;
+  }
+
+  game.snake.setDirection(dir);
+}

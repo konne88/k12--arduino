@@ -1,12 +1,17 @@
-// import libraries used to talk to the Arduino
 import processing.serial.*;
+import cc.arduino.*;
 
-int WIDTH = 20;
-int HEIGHT = 20;
+int PIN_UP = 6;
+int PIN_DOWN = 4;
+int PIN_LEFT = 8;
+int PIN_RIGHT = 2;
+
+int WIDTH = 30;
+int HEIGHT = 30;
 int SIZE = 14;
 Snake snake;
 Position food;
-Serial myPort;  
+Arduino arduino;
 
 void setup() {
   size(WIDTH*SIZE,HEIGHT*SIZE);
@@ -14,13 +19,20 @@ void setup() {
   snake = new Snake(new Position(WIDTH/2, HEIGHT/2), RIGHT);
   food = new Position(int(random(WIDTH)), int(random(HEIGHT)));
 
-  myPort = new Serial(this, Serial.list()[1], 9600);
-   
+  println(Arduino.list());
+
+  arduino = new Arduino(this, Arduino.list()[0], 57600);
+  arduino.pinMode(PIN_UP, Arduino.INPUT);
+  arduino.pinMode(PIN_DOWN, Arduino.INPUT);
+  arduino.pinMode(PIN_LEFT, Arduino.INPUT);
+  arduino.pinMode(PIN_RIGHT, Arduino.INPUT);
+  
   //speed of game
   frameRate(12);
 }
 
 void draw() {
+  checkArduino();
   fill(0);
   background(255, 255, 255);
 
@@ -64,23 +76,19 @@ void keyPressed() {
   }
 }
 
-void serialEvent(Serial myPort) {
-  int command = myPort.read();
-  int dir;
-
-  if (command == 2) { 
-    dir = LEFT;
-  } else if (command == 3) { 
-    dir = RIGHT;
-  } else if (command == 0) { 
-    dir = UP;
-  } else if (command == 1) { 
-    dir = DOWN;
-  } else {
-    return;
+void checkArduino() {
+  if(arduino.digitalRead(PIN_LEFT) == Arduino.HIGH) {
+    snake.setDirection(LEFT);
   }
-
-  snake.setDirection(dir);
+  else if(arduino.digitalRead(PIN_RIGHT) == Arduino.HIGH) {
+    snake.setDirection(RIGHT);
+  }
+  else if(arduino.digitalRead(PIN_UP) == Arduino.HIGH) {
+    snake.setDirection(UP);
+  }
+  else if(arduino.digitalRead(PIN_DOWN) == Arduino.HIGH) {
+    snake.setDirection(DOWN);
+  }
 }
 
 void drawBox(Position position) {
@@ -162,4 +170,3 @@ class Position {
     return new Position(this.x, this.y);
   }
 }
-

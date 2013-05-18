@@ -41,12 +41,8 @@ void setup() {
   food = new Position(int(random(WIDTH)), int(random(HEIGHT)));
 
   // Connect to the arduino
-  println(Arduino.list());
-  arduino = new Arduino(this, Arduino.list()[0], 57600);
-  arduino.pinMode(PIN_UP, Arduino.INPUT);
-  arduino.pinMode(PIN_DOWN, Arduino.INPUT);
-  arduino.pinMode(PIN_LEFT, Arduino.INPUT);
-  arduino.pinMode(PIN_RIGHT, Arduino.INPUT);
+  // You don't have to understand or change this line.
+  connectToArduino();
   
   //speed of game
   frameRate(12);
@@ -55,7 +51,10 @@ void setup() {
 // This draws the game on the screen. It also moves the snake, and
 // is responsible for killing the snake if the player loses the game.
 void draw() {
+  // You don't have to understand or change this line.
   checkArduino();
+
+  // set the background colors
   fill(0);
   background(255, 255, 255);
 
@@ -106,7 +105,7 @@ void draw() {
 void keyPressed() {
   // only use special keys such as arrow keys
   if(key == CODED) {
-    snake.setDirection(keyCode);
+    snake.changeDirection(keyCode);
   }
 }
 
@@ -114,17 +113,30 @@ void keyPressed() {
 // of the snake accordingly.
 void checkArduino() {
   if(arduino.digitalRead(PIN_LEFT) == Arduino.HIGH) {
-    snake.setDirection(LEFT);
+    snake.changeDirection(LEFT);
   }
   else if(arduino.digitalRead(PIN_RIGHT) == Arduino.HIGH) {
-    snake.setDirection(RIGHT);
+    snake.changeDirection(RIGHT);
   }
   else if(arduino.digitalRead(PIN_UP) == Arduino.HIGH) {
-    snake.setDirection(UP);
+    snake.changeDirection(UP);
   }
   else if(arduino.digitalRead(PIN_DOWN) == Arduino.HIGH) {
-    snake.setDirection(DOWN);
+    snake.changeDirection(DOWN);
   }
+}
+
+// ================================================================
+// You don't have to understand or change all of the following code
+// ================================================================
+
+void connectToArduino(){
+  println(Arduino.list());
+  arduino = new Arduino(this, Arduino.list()[0], 57600);
+  arduino.pinMode(PIN_UP, Arduino.INPUT);
+  arduino.pinMode(PIN_DOWN, Arduino.INPUT);
+  arduino.pinMode(PIN_LEFT, Arduino.INPUT);
+  arduino.pinMode(PIN_RIGHT, Arduino.INPUT);
 }
 
 void drawBox(Position position) {
@@ -194,7 +206,7 @@ class Snake {
   }
   
   // Sets the snake's direction; doesn't allow turning on itself.
-  void setDirection(int dir) {
+  void changeDirection(int dir) {
     if (dir != opposite(this.direction)) {
       direction = dir;
     }
